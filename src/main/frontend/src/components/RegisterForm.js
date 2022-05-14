@@ -3,7 +3,7 @@ import axios from "axios";
 import {Link, withRouter} from "react-router-dom";
 import {Button, Container, Form, FormGroup, Input, Label} from "reactstrap";
 
-class LoginForm extends Component {
+class RegisterForm extends Component {
     emptyItem = {
         "username": "",
         "password": ""
@@ -26,9 +26,7 @@ class LoginForm extends Component {
         let {item} = this.state;
         const formData = new FormData();
         Object.entries(item).forEach(([key, value]) => formData.append(key, value));
-        axios.post("http://localhost:8080/login", formData).then(response => {
-            localStorage.setItem("access_token", response.data["access_token"])
-        });
+        axios.post("http://localhost:8080/register", formData).then(response => console.log(response));
     }
 
 
@@ -69,4 +67,4 @@ class LoginForm extends Component {
     }
 }
 
-export default withRouter(LoginForm);
+export default withRouter(RegisterForm);

@@ -44,6 +44,7 @@ class EditForm extends Component {
             method: item.id ? "PATCH" : "POST",
             headers: {
                 'content-type': 'multipart/form-data',
+                'Authorization': localStorage.getItem("access_token")
             },
             url: URL,
             data: formData

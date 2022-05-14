@@ -13,7 +13,11 @@ class CatGallery extends Component {
 
   async componentDidMount() {
     let json;
-    await axios.get('/api/cats').then(response => json = response.data);
+    await axios.get('/api/cats', {
+      headers: {
+        'Authorization': localStorage.getItem("access_token")
+      }
+    }).then(response => json = response.data);
 
     this.setState({cats: json});
     this.deleteCat = this.deleteCat.bind(this);
