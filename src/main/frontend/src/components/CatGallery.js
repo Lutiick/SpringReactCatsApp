@@ -3,8 +3,8 @@ import {Component} from "react";
 import CatImage from "./CatImage";
 import {Alert, Button, ButtonGroup, Container, Row} from "reactstrap";
 import axios from "axios";
-import {Link, withRouter} from "react-router-dom";
-import {fetchCats} from "../service/cat/catAction";
+import {Link} from "react-router-dom";
+import {fetchCats, deleteCat} from "../service/index";
 import {connect} from "react-redux";
 
 
@@ -25,13 +25,7 @@ class CatGallery extends Component {
     }
 
     deleteCat(id) {
-        const URL = `/api/cats/${id}`;
-        axios.delete(URL).then((response) => {
-            if (response.status === 200) {
-                let updatedCats = [...this.state.cats].filter(cat => cat.id !== id);
-                this.setState({cats: updatedCats})
-            }
-        });
+        this.props.deleteCat(id);
     }
 
     render() {
@@ -75,6 +69,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
     return {
         fetchCats: () => dispatch(fetchCats()),
+        deleteCat: (id) => dispatch(deleteCat(id))
     };
 };
 
