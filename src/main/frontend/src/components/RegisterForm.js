@@ -1,9 +1,10 @@
 import React, {Component} from "react";
-import axios from "axios";
-import {Link, withRouter} from "react-router-dom";
-import {Button, Container, Form, FormGroup, Input, Label} from "reactstrap";
+import {Link} from "react-router-dom";
+import {Alert, Button, Container, Form, FormGroup, Input, Label} from "reactstrap";
+import {register} from "../reduxService";
+import {connect} from "react-redux";
 
-class RegisterForm extends Component {
+class LoginForm extends Component {
     emptyItem = {
         "username": "",
         "password": ""
@@ -22,11 +23,19 @@ class RegisterForm extends Component {
     }
 
     handleSubmit(event) {
-        event.preventDefault()
-        let {item} = this.state;
-        const formData = new FormData();
-        Object.entries(item).forEach(([key, value]) => formData.append(key, value));
-        axios.post("http://localhost:8080/register", formData).then(response => console.log(response));
+        event.preventDefault();
+        this.setState({loading: true});
+        const {history} = this.props;
+        this.props.register(this.state.item.username, this.state.item.password)
+            .then(() => {
+                history.push("/login");
+                window.location.reload();
+            })
+            .catch(() => {
+                this.setState({
+                    loading: false,
+                })
+            });
     }
 
 
@@ -40,31 +49,47 @@ class RegisterForm extends Component {
     }
 
     render () {
-        const {item} = this.state;
-
+        const {message} = this.props;
 
         return (
             <Container>
-                <h1>Логин</h1>
+                <h1>Регистрация</h1>
                 <Form onSubmit={this.handleSubmit}>
                     <FormGroup>
-                        <Label for="username">Описание</Label>
+                        <Label for="username">Имя</Label>
                         <Input type='text'
                                name="username" id="username" onChange={this.handleChange}/>
                     </FormGroup>
                     <FormGroup>
-                        <Label for="password">Картинка</Label>
+                        <Label for="password">Пароль</Label>
                         <Input type="text" name="password" id="password" onChange={this.handleChange}/>
                     </FormGroup>
                     <FormGroup>
-                        <Button color="primary" type="submit" className="me-3">Save</Button>
-                        <Button color="secondary" tag={Link} to="/">Cancel</Button>
+                        <Button color="primary" type="submit" className="me-3">Отправить</Button>
+                        <Button color="secondary" tag={Link} to="/">Отмена</Button>
                     </FormGroup>
-
+                    {message && (
+                        <Alert>
+                            {message}
+                        </Alert>
+                    )}
                 </Form>
             </Container>
         )
     }
 }
 
-export default withRouter(RegisterForm);
+function mapStateToProps(state) {
+    const { message } = state.message;
+    return {
+        message
+    };
+}
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        register: (username, password) =>  dispatch(register(username, password))
+    };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(LoginForm);

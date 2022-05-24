@@ -4,11 +4,13 @@ import {BrowserRouter as Router, Switch, Route} from "react-router-dom";
 import EditForm from "./EditForm";
 import LoginForm from "./LoginForm";
 import RegisterForm from "./RegisterForm";
+import Navigation from "./Navigation";
 
 class App extends Component {
     render() {
         return (
             <Router>
+                <Navigation />
                 <Switch>
                     <Route path='/' exact={true}>
                             <CatGallery/>

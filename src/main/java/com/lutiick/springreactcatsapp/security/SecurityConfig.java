@@ -1,5 +1,6 @@
 package com.lutiick.springreactcatsapp.security;
 
+import com.lutiick.springreactcatsapp.utils.AuthService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,10 +24,14 @@ import java.util.Collections;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
+    private final AuthService authService;
 
-    public SecurityConfig(@Qualifier("userServiceImpl") UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+    public SecurityConfig(@Qualifier("userServiceImpl") UserDetailsService userDetailsService,
+                          PasswordEncoder passwordEncoder,
+                          AuthService authService) {
         this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
+        this.authService = authService;
     }
 
     @Override
@@ -41,8 +46,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.authorizeRequests().antMatchers("/login", "/register", "/refresh").permitAll();
         http.authorizeRequests().anyRequest().authenticated();
-        http.addFilter(new JwtAuthFilter(authenticationManagerBean()));
-        http.addFilterBefore(new JwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilter(new JwtAuthFilter(authenticationManagerBean(), authService));
+        http.addFilterBefore(new JwtAuthorizationFilter(authService), UsernamePasswordAuthenticationFilter.class);
         http.exceptionHandling().authenticationEntryPoint(authenticationEntryPoint());
     }
 
@@ -59,13 +64,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
 
+
     @Bean
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
+
     @Bean
     public AuthenticationEntryPoint authenticationEntryPoint(){
-        return new NoRedirectAuthenticationEntryPoint();
+        return new JwtAuthenticationEntryPoint();
     }
+
 }

@@ -1,5 +1,7 @@
 import * as CT from "./catTypes";
 import axios from "axios";
+import authHeader from "../../services/authHeader";
+import catService from "../../services/catService";
 
 const fetchCatsRequest = () => {
     return {type: CT.FETCH_CATS_REQUEST};
@@ -22,11 +24,7 @@ const catsFailure = (error) => {
 export const fetchCats = () => {
     return (dispatch) => {
         dispatch(fetchCatsRequest());
-        axios.get('/api/cats', {
-            headers: {
-                'Authorization': localStorage.getItem("access_token")
-            }
-        })
+        catService.getList()
             .then((response) => {
                 console.log(response);
                 console.log("hello");
@@ -55,9 +53,7 @@ export const deleteCat = (id) => {
     return (dispatch) => {
         dispatch(deleteCatRequest());
         axios.delete(`/api/cats/${id}`, {
-            headers: {
-                'Authorization': localStorage.getItem("access_token")
-            }
+            headers: authHeader()
         })
             .then((response) => {
                 dispatch(deleteCatSuccess(id));

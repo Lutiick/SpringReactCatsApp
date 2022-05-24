@@ -1,7 +1,8 @@
 import React, {Component} from "react";
-import axios from "axios";
-import {Link, withRouter} from "react-router-dom";
-import {Button, Container, Form, FormGroup, Input, Label} from "reactstrap";
+import {Link, withRouter, Redirect} from "react-router-dom";
+import {Alert, Button, Container, Form, FormGroup, Input, Label} from "reactstrap";
+import {login} from "../reduxService/index"
+import {connect} from "react-redux";
 
 class LoginForm extends Component {
     emptyItem = {
@@ -23,12 +24,19 @@ class LoginForm extends Component {
 
     handleSubmit(event) {
         event.preventDefault()
-        let {item} = this.state;
-        const formData = new FormData();
-        Object.entries(item).forEach(([key, value]) => formData.append(key, value));
-        axios.post("http://localhost:8080/login", formData).then(response => {
-            localStorage.setItem("access_token", response.data["access_token"])
-        });
+        this.setState({loading: true});
+        const {history} = this.props;
+        console.log(this.props);
+        this.props.login(this.state.item.username, this.state.item.password)
+            .then(() => {
+                history.push("/");
+                window.location.reload();
+            })
+            .catch(() => {
+                this.setState({
+                    loading: false,
+                })
+            });
     }
 
 
@@ -42,7 +50,10 @@ class LoginForm extends Component {
     }
 
     render () {
-        const {item} = this.state;
+        const {isLoggedIn, message} = this.props;
+        // if (isLoggedIn) {
+        //     return <Redirect to={"/"} />
+        // }
 
 
         return (
@@ -59,14 +70,33 @@ class LoginForm extends Component {
                         <Input type="text" name="password" id="password" onChange={this.handleChange}/>
                     </FormGroup>
                     <FormGroup>
-                        <Button color="primary" type="submit" className="me-3">Save</Button>
-                        <Button color="secondary" tag={Link} to="/">Cancel</Button>
+                        <Button color="primary" type="submit" className="me-3">Отправить</Button>
+                        <Button color="secondary" tag={Link} to="/">Отмена</Button>
                     </FormGroup>
-
+                    {message && (
+                        <Alert>
+                            {message}
+                        </Alert>
+                    )}
                 </Form>
             </Container>
         )
     }
 }
 
-export default withRouter(LoginForm);
+function mapStateToProps(state) {
+    const { isLoggedIn } = state.auth;
+    const { message } = state.message;
+    return {
+        isLoggedIn,
+        message
+    };
+}
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        login: (username, password) =>  dispatch(login(username, password))
+    };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(LoginForm);
